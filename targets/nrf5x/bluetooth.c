@@ -2681,12 +2681,17 @@ static void ble_stack_init() {
 #endif
 
 #if defined(ESPR_DCDC_ENABLE)
-    if (!(NRF_POWER->RESETREAS & POWER_RESETREAS_LOCKUP_Msk)) {
-      /* If we previously booted and got a LOCKUP reset, this could well be due to a DCDC
-      converter issue, so don't enable DCDC if that's the case. */
-      // can only be enabled if we're sure we have a DC-DC
+    uint32_t gpregret;
+    sd_power_gpregret_get(0, &gpregret);
+    if (gpregret != 0xDC) {
+      /* If the DCDC converter is not connected or broken, sd_power_dcdc_mode_set will
+      cause the device to lock up. To detect this and try again without it, we'll use the
+      GPREGRET reg (which is persisted through reboots). If it's set to 0xDC it is because
+      the chip locked up during sd_power_dcdc_mode_set */
+      sd_power_gpregret_set(0, 0xDC);
       err_code = sd_power_dcdc_mode_set(NRF_POWER_DCDC_ENABLE);
       APP_ERROR_CHECK(err_code);
+      sd_power_gpregret_set(0, gpregret);
     }
 #endif
 #if defined(ESPR_DCDC_HV_ENABLE)
