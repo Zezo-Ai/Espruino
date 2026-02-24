@@ -2785,10 +2785,7 @@ uint32_t jsble_advertising_start() {
 
   JsVar *advDataVar = jswrap_ble_getCurrentAdvertisingData();
   JSV_GET_AS_CHAR_ARRAY(advPtr, advLen, advDataVar);
-  if (!advPtr) {
-    jsvUnLock(advDataVar);
-    return NRF_ERROR_INVALID_PARAM; // couldn't convert advertising data to char array
-  }
+  // advPtr can be 0 here (esp when booting as we have no adv data)
 
   // Set up scan response packet's contents
   ble_uuid_t adv_uuids[ADVERTISE_MAX_UUIDS];
@@ -2904,7 +2901,7 @@ uint32_t jsble_advertising_start() {
   memset(&m_ble_gap_adv_data, 0, sizeof(m_ble_gap_adv_data));
 #endif
   err_code = jsble_advertising_update(
-    (uint8_t*)advPtr, advLen,
+    (uint8_t*)advPtr, advLen, // advPtr can be NULL here and it's no big deal
     non_scannable ? NULL : m_enc_scan_response_data, non_scannable ? 0 : m_enc_scan_response_data_len,
     &adv_params
   );
