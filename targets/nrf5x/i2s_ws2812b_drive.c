@@ -167,12 +167,12 @@ ret_code_t i2s_ws2812b_drive_xfer(rgb_led_t *led_array, uint16_t num_leds, uint8
 	// finally, stop the output
 	nrf_drv_i2s_stop();
 
+	// un-initialize i2s
+	nrf_drv_i2s_uninit();
+
 	// USE_WORKAROUND_FOR_I2S_STOP_ANOMALY (anomaly 194) from SDK17 (SDK15 doesn't have this included)
 	*((volatile uint32_t *)(((uint32_t)NRF_I2S) + 0x38)) = 1;
 	*((volatile uint32_t *)(((uint32_t)NRF_I2S) + 0x3C)) = 1;
-
-	// un-initialize i2s
-	nrf_drv_i2s_uninit();
 
   // I2S not only uses pins when it's not supposed to, it doesn't
   // even de-allocate them after so we must do it manually
