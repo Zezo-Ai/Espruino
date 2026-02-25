@@ -1,5 +1,3 @@
-          : nRF5x: Fix 600uA power draw if neopixel used while bluetooth advertising stopped (NRF anomaly 194)
-
      2v29 : Array.sort: fix issue where *some* sorts of 10+ items could cause the array not to be GC'd
             Bangle.js: Updated built-in Layout.js with some minor fixes
             STM32: Ensure setDeepSleep(1) will only sleep if there are no active PWM outputs

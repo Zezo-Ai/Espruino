@@ -57,7 +57,7 @@ ret_code_t i2s_ws2812b_drive_xfer(rgb_led_t *led_array, uint16_t num_leds, uint8
 #endif
   uint32_t lrckConf = lrckReg->PIN_CNF[lrckPinNumber];
 #endif
-
+	
 	// define configs
 	nrf_drv_i2s_config_t config;
 	/* The I2S interface refuses to work if SCK isn't defined,
@@ -85,11 +85,11 @@ ret_code_t i2s_ws2812b_drive_xfer(rgb_led_t *led_array, uint16_t num_leds, uint8
 	config.channels     = NRF_I2S_CHANNELS_STEREO;
 	config.mck_setup 	= NRF_I2S_MCK_32MDIV10;
 	config.ratio     	= NRF_I2S_RATIO_32X;
-
+	
 	// initialize i2s
 	err_code = nrf_drv_i2s_init(&config, i2s_ws2812b_drive_handler);
 	APP_ERROR_CHECK(err_code);
-	if ( err_code != NRF_SUCCESS )
+	if ( err_code != NRF_SUCCESS ) 
 	{
 		return err_code;
 	}
@@ -142,7 +142,7 @@ ret_code_t i2s_ws2812b_drive_xfer(rgb_led_t *led_array, uint16_t num_leds, uint8
     // fill the remainder with 0
     while (p_xfer < p_xfer_end)
       *(p_xfer++) = 0;
-
+	
     // start transfer
 #if NRF_SD_BLE_API_VERSION>5
         nrfx_i2s_buffers_t buffers;
@@ -153,7 +153,7 @@ ret_code_t i2s_ws2812b_drive_xfer(rgb_led_t *led_array, uint16_t num_leds, uint8
 	err_code = nrf_drv_i2s_start(NULL, m_buffer_tx, tx_buffer_size, 0/*flags*/);
 #endif
 	APP_ERROR_CHECK(err_code);
-	if ( err_code != NRF_SUCCESS )
+	if ( err_code != NRF_SUCCESS ) 
 	{
 		return err_code;
 	}
@@ -164,12 +164,8 @@ ret_code_t i2s_ws2812b_drive_xfer(rgb_led_t *led_array, uint16_t num_leds, uint8
 	// as far in advance as it can.
 	while (i2s_ws2812b_drive_flag_buffer_cnt < 5);
 
-	// finally, stop the output
-	nrf_drv_i2s_stop();
-
-	// USE_WORKAROUND_FOR_I2S_STOP_ANOMALY (anomaly 194) from SDK17 (SDK15 doesn't have this included)
-	*((volatile uint32_t *)(((uint32_t)NRF_I2S) + 0x38)) = 1;
-	*((volatile uint32_t *)(((uint32_t)NRF_I2S) + 0x3C)) = 1;
+    // finally, stop the output
+    nrf_drv_i2s_stop();
 
 	// un-initialize i2s
 	nrf_drv_i2s_uninit();
@@ -186,7 +182,8 @@ ret_code_t i2s_ws2812b_drive_xfer(rgb_led_t *led_array, uint16_t num_leds, uint8
   lrckReg->PIN_CNF[lrckPinNumber] = lrckConf;
 #endif
 #endif
-
+ 
+	
 	return NRF_SUCCESS;
 }
 
