@@ -1730,15 +1730,11 @@ static void dnsFoundCallback(
   jsDebug(DBG_INFO, "Wifi.getHostByName CB - %s %x\n", hostname, ipAddr );
   if (g_jsHostByNameCallback != NULL) {
     JsVar *params[1];
-    if (ipAddr == NULL) {
-      params[0] = jsvNewNull();
+    if (ipAddr && IP_IS_V4(ipAddr)) {
+      ip4_addr_t *ip4 = ip_2_ip4(ipAddr);
+      params[0] = networkGetAddressAsString((uint8_t *)&ip4->addr, 4, 10, '.');
     } else {
-      if (IP_IS_V4(ipAddr)) {
-        ip4_addr_t *ip4 = ip_2_ip4(ipAddr);
-        params[0] = networkGetAddressAsString((uint8_t *)&ip4->addr, 4, 10, '.');
-      } else {
-        params[0] = jsvNewNull();
-      }
+      params[0] = jsvNewNull();
     }
     jsiQueueEvents(NULL, g_jsHostByNameCallback, params, 1);
     jsvUnLock(params[0]);
