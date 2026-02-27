@@ -252,6 +252,7 @@ JsVar *jswrap_process_memory(JsVar *gc) {
       jsvObjectSetChildAndUnLock(obj, "gctime", jsvNewFromFloat(jshGetMillisecondsFromTime(time2-time1)));
     }
     jsvObjectSetChildAndUnLock(obj, "blocksize", jsvNewFromInteger(sizeof(JsVar)));
+#ifndef SAVE_ON_FLASH
     JsVar *rx = jsvNewObject();
     jsvObjectSetChildAndUnLock(rx, "used", jsvNewFromInteger(jshGetEventsUsed()));
     jsvObjectSetChildAndUnLock(rx, "total", jsvNewFromInteger(IOBUFFERMASK+1));
@@ -260,6 +261,7 @@ JsVar *jswrap_process_memory(JsVar *gc) {
     jsvObjectSetChildAndUnLock(tx, "used", jsvNewFromInteger(jshGetTransmitBufferUsage()));
     jsvObjectSetChildAndUnLock(tx, "total", jsvNewFromInteger(TXBUFFERMASK+1));
     jsvObjectSetChildAndUnLock(obj, "tx", tx);
+#endif
 #ifdef ARM
     extern uint32_t LINKER_END_VAR; // end of ram used (variables) - should be 'void', but 'int' avoids warnings
     extern uint32_t LINKER_ETEXT_VAR; // end of flash text (binary) section - should be 'void', but 'int' avoids warnings
