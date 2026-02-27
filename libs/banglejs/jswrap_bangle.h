@@ -70,6 +70,7 @@ void jswrap_banglejs_beep_callback(); // internal use only
 JsVar *jswrap_banglejs_beep(int time, int freq);
 void jswrap_banglejs_buzz_callback(); // internal use only
 JsVar *jswrap_banglejs_buzz(int time, JsVarFloat amt);
+JsVar *jswrap_banglejs_haptic(JsVar* eventName);
 
 
 void jswrap_banglejs_off();

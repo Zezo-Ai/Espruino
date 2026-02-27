@@ -970,6 +970,7 @@ JsVar *promiseBuzz;
 //
 unsigned short beepFreq;
 unsigned char buzzAmt;
+int hapticTime = 25; // in ms - time to run vibration motor for a haptic event
 
 typedef enum {
   JSBF_NONE,
@@ -2730,6 +2731,9 @@ before reading and disabling the hardware watch on BTN1).
   off
 * `btnLoadTimeout` how many milliseconds does the home button have to be pressed
 for before the clock is reloaded? 1500ms default, or 0 means never.
+* `hapticTime` (2v30+) for haptic buzzes, how long should they last in ms? Default is 25ms - setting to 0 disables haptics entirely.
+* `beep` (2v30+) enable or disable whether 'Bangle.beep' does anything. Default is `true`.
+* `buzz` (2v30+) enable or disable whether 'Bangle.buzz' does anything. Default is `true`.
 * `manualWatchdog` if set, this disables automatic kicking of the watchdog timer
 from the interrupt (when the button isn't held). You will then have to manually
 call `E.kickWatchdog()` from your code or the watch will reset after ~5 seconds.
@@ -2764,6 +2768,8 @@ JsVar * _jswrap_banglejs_setOptions(JsVar *options, bool createObject) {
   bool wakeOnTwist = bangleFlags&JSBF_WAKEON_TWIST;
   bool powerSave = bangleFlags&JSBF_POWER_SAVE;
   bool manualWatchdog = bangleFlags&JSBF_MANUAL_WATCHDOG;
+  bool beep = bangleFlags&JSBF_ENABLE_BEEP;
+  bool buzz = bangleFlags&JSBF_ENABLE_BUZZ;
 #ifdef BANGLEJS_Q3
   bool lowResistanceFix = bangleFlags&JSBF_BTN_LOW_RESISTANCE_FIX;
 #endif
@@ -2828,6 +2834,9 @@ JsVar * _jswrap_banglejs_setOptions(JsVar *options, bool createObject) {
       {"lcdPowerTimeout", JSV_INTEGER, &lcdPowerTimeout},
       {"backlightTimeout", JSV_INTEGER, &backlightTimeout},
       {"btnLoadTimeout", JSV_INTEGER, &btnLoadTimeout},
+      {"hapticTime", JSV_INTEGER, &hapticTime},
+      {"beep", JSV_BOOLEAN, &beep},
+      {"buzz", JSV_BOOLEAN, &buzz},
 #ifdef TOUCH_DEVICE
       {"touchX1", JSV_INTEGER, &touchX1},
       {"touchY1", JSV_INTEGER, &touchY1},
@@ -2852,6 +2861,8 @@ JsVar * _jswrap_banglejs_setOptions(JsVar *options, bool createObject) {
     bangleFlags = (bangleFlags&~JSBF_WAKEON_TWIST) | (wakeOnTwist?JSBF_WAKEON_TWIST:0);
     bangleFlags = (bangleFlags&~JSBF_POWER_SAVE) | (powerSave?JSBF_POWER_SAVE:0);
     bangleFlags = (bangleFlags&~JSBF_MANUAL_WATCHDOG) | (manualWatchdog?JSBF_MANUAL_WATCHDOG:0);
+    bangleFlags = (bangleFlags&~JSBF_ENABLE_BEEP) | (beep?JSBF_ENABLE_BEEP:0);
+    bangleFlags = (bangleFlags&~JSBF_ENABLE_BUZZ) | (buzz?JSBF_ENABLE_BUZZ:0);
 #ifdef BANGLEJS_Q3
     bangleFlags = (bangleFlags&~JSBF_BTN_LOW_RESISTANCE_FIX) | (lowResistanceFix?JSBF_BTN_LOW_RESISTANCE_FIX:0);
 #endif
@@ -5545,6 +5556,38 @@ JsVar *jswrap_banglejs_buzz(int time, JsVarFloat amt) {
 
   return jsvLockAgain(promiseBuzz);
 #endif
+}
+
+/*JSON{
+    "type" : "staticmethod",
+    "class" : "Bangle",
+    "name" : "haptic",
+    "generate" : "jswrap_banglejs_haptic",
+    "params" : [
+      ["eventName","JsVar","Name of the event - see below"]
+    ],
+    "return" : ["JsVar","A promise, completed when haptic vibration is finished"],
+    "return_object":"Promise",
+    "ifdef" : "BANGLEJS"
+}
+Buzz the vibration motor has a haptic response to some event (eg touching the screen).
+
+The length of the buzz is determined by the `hapticTime` variable in `Bangle.setOptions`. If `hapticTime` is `0`
+there will be no haptic response.
+
+`eventName` is the source of the haptic event. Apps may override `Bangle.haptic` to
+provide different haptic responses for different event types. Currently used event names are:
+
+* `touch` - an area on the touchscreen is pressed
+* `btn` - a button has been pressed (we don't provide a haptic buzz for this)
+* `drag` - the touchscreen is dragged enough to trigger an event in `Bangle.setUI` updown/leftright modes.
+* `back` - the back button on the touchscreen has been pressed
+
+*/
+JsVar *jswrap_banglejs_haptic(JsVar* eventName) {
+  if (hapticTime<=0 || jsvIsStringEqual(eventName, "btn"))
+    return jswrap_promise_resolve(NULL); // no haptics
+  return jswrap_banglejs_buzz(hapticTime, 1);
 }
 
 static void jswrap_banglejs_periph_off() {

@@ -42,13 +42,13 @@
         },
         select : function(idx) {
           if (idx<0) return; // TITLE
-          Bangle.buzz(20);
           item.value = item.min + idx*step;
           if (item.onchange) item.onchange(item.value);
           if (scroller.isActive()) { // onchange may have changed menu!
             scr.scroll = l.scroller.scroll; // set scroll to prev position
             show(); // redraw original menu
           }
+          Bangle.haptic("touch");
         }
       });
     } else {
@@ -93,14 +93,14 @@
           while (Math.abs(dy)>32) {
             if (dy>0) { dy-=32; cb(1); }
             else { dy+=32; cb(-1); }
-            Bangle.buzz(20);
+            Bangle.haptic("drag");
           }
         },
         touch : (_,e) => {
-          Bangle.buzz(20);
           if (e.y<82) cb(-1); // top third
           else if (e.y>142) cb(1); // bottom third
           else cb(); // middle = accept
+          Bangle.haptic("touch");
         }
       });
     }
@@ -137,7 +137,6 @@
     select : function(idx, touch) {
       if (idx<0) return back&&back(); // title
       var item = menu[keys[idx]];
-      Bangle.buzz(20);
       if ("function" == typeof item) item(touch);
       else if ("object" == typeof item) {
         if ("number" == typeof item.value) {
@@ -150,6 +149,7 @@
           if (l.scroller.isActive()) l.scroller.drawItem(idx);
         }
       }
+      Bangle.haptic("touch");
     }
   };
   function show() {
