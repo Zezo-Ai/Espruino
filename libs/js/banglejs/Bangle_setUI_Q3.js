@@ -47,16 +47,16 @@
       dy += e.dy;
       if (!e.b) dy=0;
       while (Math.abs(dy)>32) {
+        Bangle.haptic("drag");
         if (dy>0) { dy-=32; cb(1) }
         else { dy+=32; cb(-1) }
-        Bangle.haptic("drag");
       }
     };
     Bangle.on('drag',Bangle.dragHandler);
-    Bangle.touchHandler = d => {Bangle.haptic("touch").then(cb);};
+    Bangle.touchHandler = d => { Bangle.haptic("touch");cb(); };
     Bangle.on("touch", Bangle.touchHandler);
     Bangle.btnWatches = [
-      setWatch(function() { Bangle.haptic("btn").then(cb); }, BTN1, {repeat:1, edge:"rising"}),
+      setWatch(function() { Bangle.haptic("btn");cb(); }, BTN1, {repeat:1, edge:"rising"}),
     ];
   } else if (mode=="leftright") {
     if (options.drag) throw new Error("Custom drag handler not supported in mode leftright!")
@@ -65,27 +65,28 @@
       dx += e.dx;
       if (!e.b) dx=0;
       while (Math.abs(dx)>32) {
+        Bangle.haptic("drag");
         if (dx>0) { dx-=32; cb(1) }
         else { dx+=32; cb(-1) }
-        Bangle.haptic("drag");
       }
     };
     Bangle.on('drag',Bangle.dragHandler);
-    Bangle.touchHandler = d => {Bangle.haptic("touch").then(cb);};
+    Bangle.touchHandler = d => { Bangle.haptic("touch");cb(); };
     Bangle.on("touch", Bangle.touchHandler);
     Bangle.btnWatches = [
-      setWatch(function() { Bangle.haptic("btn").then(cb); }, BTN1, {repeat:1, edge:"rising"}),
+      setWatch(function() { Bangle.haptic("btn");cb(); }, BTN1, {repeat:1, edge:"rising"}),
     ];
   } else if (mode=="clock") {
     Bangle.CLOCK=1;
     Bangle.btnWatches = [
-      setWatch(function() { Bangle.haptic("btn").then(Bangle.showLauncher); }, BTN1, {repeat:1, edge:"rising"}),
+      setWatch(function() { Bangle.haptic("btn");Bangle.showLauncher(); }, BTN1, {repeat:1, edge:"rising"}),
     ];
   } else if (mode=="clockupdown") {
     Bangle.CLOCK=1;
     Bangle.touchHandler = (d,e) => {
       if (e.x < 120) return;
-      Bangle.haptic("touch").then(() => cb((e.y > 88) ? 1 : -1));
+      Bangle.haptic("touch");
+      cb((e.y > 88) ? 1 : -1);
     };
     Bangle.on("touch", Bangle.touchHandler);
     Bangle.btnWatches = [
@@ -126,7 +127,8 @@
     if (Bangle.btnWatches===undefined)
       Bangle.btnWatches = [ setWatch(function() {
         Bangle.btnWatches = undefined; // watch doesn't repeat
-        Bangle.haptic("btn").then(options.back);
+        Bangle.haptic("btn");
+        options.back();
       }, BTN1, {edge:"rising"}) ];
     // if we have widgets loaded *and* visible at the top, add a back widget (see #3788)
     if (global.WIDGETS && Bangle.appRect.y) {
@@ -135,7 +137,8 @@
         if (e.y<36 && e.x<48) {
           e.handled = true;
           E.stopEventPropagation(); // stop subsequent touch handlers from being called
-          Bangle.haptic("back").then(options.back);
+          Bangle.haptic("back");
+          options.back();
         }
       };
       Bangle.prependListener("touch", touchHandler);

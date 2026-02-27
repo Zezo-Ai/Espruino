@@ -48,7 +48,6 @@
             scr.scroll = l.scroller.scroll; // set scroll to prev position
             show(); // redraw original menu
           }
-          Bangle.haptic("touch");
         }
       });
     } else {
@@ -91,16 +90,16 @@
           dy += e.dy; // after a certain amount of dragging up/down fire cb
           if (!e.b) dy=0;
           while (Math.abs(dy)>32) {
+            Bangle.haptic("drag");
             if (dy>0) { dy-=32; cb(1); }
             else { dy+=32; cb(-1); }
-            Bangle.haptic("drag");
           }
         },
         touch : (_,e) => {
+          Bangle.haptic("touch");
           if (e.y<82) cb(-1); // top third
           else if (e.y>142) cb(1); // bottom third
           else cb(); // middle = accept
-          Bangle.haptic("touch");
         }
       });
     }
@@ -149,7 +148,6 @@
           if (l.scroller.isActive()) l.scroller.drawItem(idx);
         }
       }
-      Bangle.haptic("touch");
     }
   };
   function show() {

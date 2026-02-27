@@ -54,6 +54,7 @@
           e.hit = true; // ensure we don't call twice if the buttons overlap
           draw(i); // highlighted button
           g.flip(); // write to screen
+          Bangle.haptic("touch");
           E.showPrompt(); // remove
           if (e.type===2 /*long press*/ && options.buttonsLong && btns[i] in options.buttonsLong)
             resolve(options.buttonsLong[btns[i]]);
@@ -65,6 +66,7 @@
     if (btns.length==1 && !options.back) ui.btn = () => {
       draw(0); // highlighted button
       g.flip(); // write to screen
+      Bangle.haptic("btn");
       E.showPrompt(); // remove
       resolve(options.buttons[btns[0]]);
     };
