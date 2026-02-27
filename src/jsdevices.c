@@ -428,6 +428,14 @@ bool jshHasTransmitData() {
   return txHead != txTail;
 }
 
+/** Returns the number of bytes currently used in the transmit buffer */
+int jshGetTransmitBufferUsage() {
+  if (txHead > txTail)
+    return (TXBUFFERMASK+1) - (txHead - txTail);
+  else
+    return txTail - txHead;
+}
+
 /**
  * flag that the buffer has overflowed.
  */
@@ -472,7 +480,7 @@ bool CALLED_FROM_INTERRUPT jshPushEvent(IOEventFlags evt, uint8_t *data, unsigne
 
 /// Push a Custom IO event into the ioBuffer (designed to be called from IRQ), returns true on success, Calls jshHadEvent();
 bool CALLED_FROM_INTERRUPT jshPushCustomEvent(IOCustomEventFlags customFlags) {
-  jshPushEvent(EV_CUSTOM, (uint8_t*)&customFlags, sizeof(customFlags));
+  return jshPushEvent(EV_CUSTOM, (uint8_t*)&customFlags, sizeof(customFlags));
 }
 
 /// Try and handle events in the IRQ itself. true if handled and shouldn't go in queue

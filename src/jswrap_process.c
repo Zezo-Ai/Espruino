@@ -210,6 +210,14 @@ memory usage.
 * `flash_length` : (on ARM) the amount of flash memory this firmware was built
   for (in bytes). **Note:** Some STM32 chips actually have more memory than is
   advertised.
+* `rx` : [2v30+] `{ used : int, total : int }` bytes of data that are in the
+receive buffer. This buffer is used to handle incoming character data and events
+from devices that comes in asyncronously (e.g. Bluetooth, Serial, USB, GPIO interrupts, etc).
+If the buffer is getting full, it means that JS code isn't executing fast enough to handle
+the data, and you may receive a `FIFO_FULL` error in `E.getErrorFlags()` if it gets completely full.
+* `tx` : [2v30+] `{ used : int, total : int }` bytes of data that are in the
+transmit buffer. This can be used for flow control - for example only writing to
+Bluetooth/Serial/USB when there is space in the buffer.
 
 Memory units are specified in 'blocks', which are around 16 bytes each
 (depending on your device). The actual size is available in `blocksize`. See
@@ -244,7 +252,14 @@ JsVar *jswrap_process_memory(JsVar *gc) {
       jsvObjectSetChildAndUnLock(obj, "gctime", jsvNewFromFloat(jshGetMillisecondsFromTime(time2-time1)));
     }
     jsvObjectSetChildAndUnLock(obj, "blocksize", jsvNewFromInteger(sizeof(JsVar)));
-
+    JsVar *rx = jsvNewObject();
+    jsvObjectSetChildAndUnLock(rx, "used", jsvNewFromInteger(jshGetEventsUsed()));
+    jsvObjectSetChildAndUnLock(rx, "total", jsvNewFromInteger(IOBUFFERMASK+1));
+    jsvObjectSetChildAndUnLock(obj, "rx", rx);
+    JsVar *tx = jsvNewObject();
+    jsvObjectSetChildAndUnLock(tx, "used", jsvNewFromInteger(jshGetTransmitBufferUsage()));
+    jsvObjectSetChildAndUnLock(tx, "total", jsvNewFromInteger(TXBUFFERMASK+1));
+    jsvObjectSetChildAndUnLock(obj, "tx", tx);
 #ifdef ARM
     extern uint32_t LINKER_END_VAR; // end of ram used (variables) - should be 'void', but 'int' avoids warnings
     extern uint32_t LINKER_ETEXT_VAR; // end of flash text (binary) section - should be 'void', but 'int' avoids warnings
